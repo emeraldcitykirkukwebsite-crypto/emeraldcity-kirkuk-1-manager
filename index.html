@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerald City - Manager Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .paper-layout {
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            direction: rtl;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        @media (min-width: 640px) {
+            .paper-layout {
+                padding: 10mm;
+            }
+        }
+        .tab-btn.active {
+            background-color: #d67a11;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 min-h-screen flex flex-col items-center">
+
+    <!-- TOP ANNOUNCEMENT & SYSTEM BANNER -->
+    <div class="w-full max-w-6xl bg-slate-800 border-l-4 sm:border-r-4 sm:border-l-0 border-amber-500 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 shadow-md">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
+            <div>
+                <span class="bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded inline-block">تێبینی / ملاحظة المدير</span>
+                <p id="system-note" class="text-xs sm:text-sm text-slate-300 mt-1">
+                    ئەم پەڕەیە تایبەتە بە پیشاندانی زانیارییەکان لە پایبەندبوون بە database.json.
+                </p>
+            </div>
+            <div class="w-full md:w-auto text-center bg-slate-900 border border-slate-700 px-3 py-2 rounded-md text-xs text-emerald-400 font-mono">
+                📅 دواین نوێکاری (Last Update): <span id="last-update-tag">جارٍ التحميل...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="w-full max-w-6xl flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <button id="tab-explorer-btn" onclick="switchTab('explorer')" class="tab-btn active px-4 py-2.5 sm:px-6 sm:py-2 rounded-lg text-sm sm:text-base font-semibold bg-slate-800 hover:bg-slate-700 transition text-center">
+            📁 فۆڵدەری خانوو و ناوەکان (Folder Explorer)
+        </button>
+        <button id="tab-advanced-btn" onclick="switchTab('advanced')" class="tab-btn px-4 py-2.5 sm:px-6 sm:py-2 rounded-lg text-sm sm:text-base font-semibold bg-slate-800 hover:bg-slate-700 transition text-center">
+            🔍 گەڕان و فلتەری پێشکەوتوو (Advanced Search)
+        </button>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+
+        <!-- SIDEBAR CONTROLS -->
+        <div class="lg:col-span-4 bg-slate-800 border border-slate-700 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col gap-4">
+            
+            <!-- FOLDER EXPLORER VIEW -->
+            <div id="section-explorer-controls" class="space-y-4">
+                <h3 class="text-amber-500 font-bold border-b border-slate-700 pb-2 text-sm sm:text-base">📁 Emerald City Data</h3>
+                <div id="folder-tree-list" class="space-y-2 max-h-[300px] sm:max-h-[450px] overflow-y-auto pr-1">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+
+            <!-- ADVANCED SEARCH VIEW -->
+            <div id="section-advanced-controls" class="space-y-4 hidden">
+                <h3 class="text-amber-500 font-bold border-b border-slate-700 pb-2 text-sm sm:text-base">🔍 گەڕان بەپێی کەس و خانوو</h3>
+                
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">گەڕان بەدوای ناو:</label>
+                    <input type="text" id="search-person-name" onkeyup="filterPersons()" placeholder="ناو بنووسە..." class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 sm:p-2 text-sm outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">هەڵبژاردنی کەس:</label>
+                    <select id="select-person-dropdown" onchange="onPersonChange()" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 sm:p-2 text-sm outline-none focus:border-amber-500">
+                        <option value="">-- کەسێک هەڵبژێرە --</option>
+                    </select>
+                </div>
+
+                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs space-y-1">
+                    <p>ژمارەی وەسڵەکان: <span id="stat-receipt-count" class="text-amber-400 font-bold">0</span></p>
+                    <p>خانوەکانی کارکردن: <span id="stat-houses-list" class="text-emerald-400 font-bold">هیچ</span></p>
+                </div>
+
+                <div class="flex justify-between items-center gap-2 pt-2">
+                    <button onclick="prevReceipt()" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded text-xs active:scale-95 transition">◀ پێشوو</button>
+                    <span id="current-receipt-index" class="text-xs text-slate-400">0 / 0</span>
+                    <button onclick="nextReceipt()" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded text-xs active:scale-95 transition">داهاتوو ▶</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RECEIPT PAPER DISPLAY AREA -->
+        <div class="lg:col-span-8 flex justify-center items-start overflow-x-auto w-full">
+            <div id="receipt-paper-view" class="paper-layout">
+                <div class="text-center py-12 sm:py-20 text-gray-500">
+                    <p class="text-lg sm:text-xl font-bold">تکایە وەسڵێک لە لیستی چەپەوە هەڵبژێرە</p>
+                    <p class="text-xs sm:text-sm mt-2">Select a receipt from the folder or search view to preview.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let dbData = { persons: {} };
+        let currentFilteredReceipts = [];
+        let currentIndex = 0;
+
+        async function loadDatabase() {
+            try {
+                const response = await fetch('database.json');
+                dbData = await response.json();
+                initApp();
+            } catch (err) {
+                alert("هەڵە: ناتوانێت پەڕەی database.json بخوێنێتەوە!");
+            }
+        }
+
+        function initApp() {
+            updateLastUpdateTag();
+            populatePersonsDropdown();
+            resetFolderView();
+        }
+
+        function updateLastUpdateTag() {
+            let latestDate = 'N/A';
+            Object.values(dbData.persons || {}).forEach(person => {
+                (person.receipts || []).forEach(r => {
+                    if (r.date && r.date > latestDate) latestDate = r.date;
+                });
+            });
+            document.getElementById('last-update-tag').innerText = latestDate;
+        }
+
+        function switchTab(tab) {
+            document.getElementById('tab-explorer-btn').classList.toggle('active', tab === 'explorer');
+            document.getElementById('tab-advanced-btn').classList.toggle('active', tab === 'advanced');
+            document.getElementById('section-explorer-controls').classList.toggle('hidden', tab !== 'explorer');
+            document.getElementById('section-advanced-controls').classList.toggle('hidden', tab !== 'advanced');
+        }
+
+        function resetFolderView() {
+            const list = document.getElementById('folder-tree-list');
+            list.innerHTML = '';
+            
+            ['Archive', 'Deleted Receipts'].forEach(folder => {
+                list.innerHTML += `<div class="p-3 sm:p-2.5 bg-slate-900 border border-slate-700 rounded-lg hover:border-amber-500 cursor-pointer text-sm">📁 ${folder}</div>`;
+            });
+
+            const housesSet = new Set();
+            Object.values(dbData.persons || {}).forEach(p => {
+                (p.receipts || []).forEach(r => (r.homes || []).forEach(h => housesSet.add(h)));
+            });
+
+            Array.from(housesSet).sort((a,b) => a - b).forEach(house => {
+                list.innerHTML += `<div class="p-3 sm:p-2.5 bg-slate-900 border border-slate-700 rounded-lg hover:border-amber-500 cursor-pointer text-sm" onclick="openHouseFolder('${house}')">🏠 خانوی ژمارە (${house})</div>`;
+            });
+        }
+
+        function openHouseFolder(houseNo) {
+            const list = document.getElementById('folder-tree-list');
+            list.innerHTML = `<div class="text-xs text-amber-400 mb-2 cursor-pointer font-bold p-1" onclick="resetFolderView()">⬅ گەڕانەوە بۆ سەرەتا</div>`;
+
+            Object.entries(dbData.persons || {}).forEach(([name, person]) => {
+                const hasReceipts = (person.receipts || []).some(r => (r.homes || []).includes(houseNo));
+                if (hasReceipts) {
+                    list.innerHTML += `<div class="p-3 sm:p-2.5 bg-slate-900 border border-slate-700 rounded-lg hover:border-amber-500 cursor-pointer text-sm" onclick="openPersonReceipts('${name}', '${houseNo}')">👤 ${name}</div>`;
+                }
+            });
+        }
+
+        function openPersonReceipts(personName, houseNo) {
+            const list = document.getElementById('folder-tree-list');
+            list.innerHTML = `<div class="text-xs text-amber-400 mb-2 cursor-pointer font-bold p-1" onclick="openHouseFolder('${houseNo}')">⬅ گەڕانەوە</div>`;
+            
+            const person = dbData.persons[personName];
+            const receipts = (person.receipts || []).filter(r => (r.homes || []).includes(houseNo));
+
+            receipts.forEach(r => {
+                list.innerHTML += `<div class="p-3 sm:p-2.5 bg-slate-900 border border-slate-700 rounded-lg hover:border-amber-500 cursor-pointer text-sm flex justify-between items-center" onclick='renderReceipt(${JSON.stringify(r)})'><span>📄 وەسڵ No.${r.no}</span><span class="text-xs text-slate-400">${r.date}</span></div>`;
+            });
+        }
+
+        function populatePersonsDropdown() {
+            const select = document.getElementById('select-person-dropdown');
+            select.innerHTML = '<option value="">-- کەسێک هەڵبژێرە --</option>';
+            Object.keys(dbData.persons || {}).forEach(name => {
+                select.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+
+        function filterPersons() {
+            const query = document.getElementById('search-person-name').value.toLowerCase();
+            const select = document.getElementById('select-person-dropdown');
+            select.innerHTML = '<option value="">-- کەسێک هەڵبژێرە --</option>';
+            Object.keys(dbData.persons || {}).forEach(name => {
+                if (name.toLowerCase().includes(query)) {
+                    select.innerHTML += `<option value="${name}">${name}</option>`;
+                }
+            });
+        }
+
+        function onPersonChange() {
+            const personName = document.getElementById('select-person-dropdown').value;
+            if (!personName) return;
+
+            const person = dbData.persons[personName];
+            currentFilteredReceipts = person.receipts || [];
+            currentIndex = 0;
+
+            document.getElementById('stat-receipt-count').innerText = currentFilteredReceipts.length;
+            const houses = [...new Set(currentFilteredReceipts.flatMap(r => r.homes || []))];
+            document.getElementById('stat-houses-list').innerText = houses.join(', ') || 'هیچ';
+
+            if (currentFilteredReceipts.length > 0) renderReceipt(currentFilteredReceipts[0]);
+        }
+
+        function prevReceipt() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderReceipt(currentFilteredReceipts[currentIndex]);
+            }
+        }
+
+        function nextReceipt() {
+            if (currentIndex < currentFilteredReceipts.length - 1) {
+                currentIndex++;
+                renderReceipt(currentFilteredReceipts[currentIndex]);
+            }
+        }
+
+        function renderReceipt(receipt) {
+            const container = document.getElementById('receipt-paper-view');
+            container.innerHTML = `
+                <div class="w-full h-16 sm:h-20 bg-emerald-900 border-b-2 border-amber-500 rounded flex items-center justify-between px-4 sm:px-6 text-white mb-4">
+                    <p class="font-bold text-sm sm:text-base">التاريخ: ${receipt.date || ''}</p>
+                    <p class="font-bold text-sm sm:text-base">No. <span class="bg-white text-black px-2 py-0.5 rounded">${receipt.no || ''}</span></p>
+                </div>
+                <div class="flex-grow p-3 sm:p-4 border-2 border-emerald-900 rounded-lg my-2 text-right text-black text-base sm:text-lg leading-relaxed overflow-x-auto">
+                    ${receipt.html || '<p>زانیاری بەردەست نییە</p>'}
+                </div>
+            `;
+        }
+
+        window.onload = loadDatabase;
+    </script>
+</body>
+</html>
