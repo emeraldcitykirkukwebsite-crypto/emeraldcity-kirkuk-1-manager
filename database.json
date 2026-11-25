@@ -6404,15 +6404,15 @@
           "signaturesHtml": "<div class=\"title-and-name-box\">\n        <p class=\"title\">ئاگاداری کار</p>\n        <p class=\"name\">ئەندازیار فریاد</p>\n    </div><div class=\"title-and-name-box\">\n        <p class=\"title\">ناوی وەستا</p>\n        <p class=\"name\">عەلی</p>\n    </div>\n                \n                \n                \n            "
         },
         {
-          "no": "8633",
-          "date": "2026/11/24",
+          "no": "8655",
+          "date": "2026/11/25",
           "work": "کاری گەچکاری",
           "homes": [],
           "html": "<font size=\"5\">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; بۆ بەشی هونەری</font><div><font size=\"5\"><br></font></div><div><font size=\"5\">ئێمە وەکوو لیژنەی هەڵسەنگاندن هەڵساین بە وەرگرتنی کاری (موخەمەر)</font></div><div><font size=\"5\"><br></font></div><div><font size=\"5\">قاتی دووەم بۆ قوتابخانە‏, (1115م</font><sup style=\"\"><font size=\"3\">2</font></sup><font size=\"5\">)، مەتری بە (1،500 دینار)</font></div><div><font size=\"5\"><br></font></div><div><br></div><div><font size=\"5\">کۆی گشتی بری پارە&nbsp;&nbsp;‏ ‏ ‏&nbsp;‏<bdi dir=\"rtl\"><span class=\"money-counting\">(1,672,500 دینار)</span></bdi>‏&nbsp;</font></div><div><font size=\"5\">ناو: وەستا عەلی رەزا&nbsp; (07503405391) + 09012501307</font></div><div><font size=\"5\">زەرعە لەلایەن ئەندازیار کەیوان کراوە</font></div><div><br></div>",
-          "signaturesHtml": "<div class=\"title-and-name-box\">\n        <p class=\"title\">چێککردنەوە</p>\n        <p class=\"name\">مدیر موقع ئەندازیار هانا</p>\n    </div><div class=\"title-and-name-box\">\n        <p class=\"title\">ئاگاداری کار</p>\n        <p class=\"name\">ئەندازیار هندرێن</p>\n    </div><div class=\"title-and-name-box\">\n        <p class=\"title\">ناوی وەستا</p>\n        <p class=\"name\">عەلی</p>\n    </div>\n                \n                \n                \n            "
+          "signaturesHtml": "<div class=\"title-and-name-box\">\n        <p class=\"title\">چێککردنەوە</p>\n        <p class=\"name\">مدیر موقع ئەندازیار هانا</p>\n    </div><div class=\"title-and-name-box\">\n        <p class=\"title\">ناوی وەستا</p>\n        <p class=\"name\">عەلی</p>\n    </div>\n                \n                \n                \n            "
         }
       ],
-      "lastReceiptNo": "8633",
+      "lastReceiptNo": "8655",
       "works": [
         "کاری گەچکاری"
       ]
@@ -20051,9 +20051,9 @@
     "کاری سەب",
     "کاری تەخطی ئەرزی"
   ],
-  "currentReceiptNo": 8655,
+  "currentReceiptNo": 8656,
   "announcement": "",
   "systemNote": "",
-  "lastUpdated": "2026-11-25T04:52:57.232Z",
+  "lastUpdated": "2026-11-25T05:30:07.089Z",
   "lastUpdatedFormatted": "2026/11/25"
 }
